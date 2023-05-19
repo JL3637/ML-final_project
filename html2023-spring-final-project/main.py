@@ -11,7 +11,7 @@ sample_df = pd.read_csv('submission.csv')
 
 y = train_df[['Danceability']].to_numpy().squeeze()
 use_list = ['Energy', 'Key', 'Loudness', 'Speechiness', 'Acousticness', 'Instrumentalness',
-            'Liveness', 'Valence', 'Tempo', 'Duration_ms']
+            'Liveness', 'Valence', 'Tempo', 'Duration_ms', 'Views', 'Likes', 'Stream', 'Comments']
 X = train_df[use_list].to_numpy()
 X_test = test_df[use_list].to_numpy()
 
@@ -22,13 +22,13 @@ X_test = test_df[use_list].to_numpy()
 # print(X)
 # print(X_test)
 
-kf = KFold(n_splits=5, random_state=42, shuffle=True)
+kf = KFold(n_splits=10, random_state=42, shuffle=True)
 predictions_array = []
 CV_score_array    = []
 for train_index, valid_index in kf.split(X):
     X_train, X_valid = X[train_index], X[valid_index]
     y_train, y_valid = y[train_index], y[valid_index]
-    regressor =  HistGradientBoostingRegressor(loss='absolute_error')
+    regressor =  HistGradientBoostingRegressor()
     regressor.fit(X_train, y_train)
     predictions_array.append(regressor.predict(X_test))
     CV_score_array.append(mean_absolute_error(y_valid,regressor.predict(X_valid)))
