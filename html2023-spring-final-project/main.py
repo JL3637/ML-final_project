@@ -11,7 +11,11 @@ sample_df = pd.read_csv('submission.csv')
 
 y = train_df[['Danceability']].to_numpy().squeeze()
 use_list = ['Energy', 'Key', 'Loudness', 'Speechiness', 'Acousticness', 'Instrumentalness',
-            'Liveness', 'Valence', 'Tempo', 'Duration_ms', 'Views', 'Likes', 'Stream', 'Comments']
+            'Liveness', 'Valence', 'Tempo', 'Duration_ms', 'Views', 'Likes', 'Stream', 'Comments',
+            'Licensed', 'official_video']
+# train_df['Album_type'].replace('album', 3, inplace=True)
+# train_df['Album_type'].replace('single', 2, inplace=True)
+# train_df['Album_type'].replace('compilation', 1, inplace=True)
 X = train_df[use_list].to_numpy()
 X_test = test_df[use_list].to_numpy()
 
@@ -19,7 +23,7 @@ X_test = test_df[use_list].to_numpy()
 # X = train_df.drop(drop_list, axis = 1).values
 
 # print(y)
-# print(X)
+# print(X[0])
 # print(X_test)
 
 kf = KFold(n_splits=10, random_state=42, shuffle=True)
