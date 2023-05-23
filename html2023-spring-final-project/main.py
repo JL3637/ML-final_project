@@ -17,7 +17,8 @@ sample_df = pd.read_csv('submission.csv')
 
 y = train_df[['Danceability']].to_numpy().squeeze()
 use_list = ['Energy', 'Key', 'Loudness', 'Speechiness', 'Acousticness', 'Instrumentalness',
-            'Liveness', 'Valence', 'Tempo', 'Duration_ms']
+            'Liveness', 'Valence', 'Tempo', 'Duration_ms', 'Views', 'Likes', 'Stream',
+            'Comments']
 X = train_df[use_list].to_numpy()
 X_test = test_df[use_list].to_numpy()
 
@@ -39,6 +40,6 @@ for train_index, valid_index in kf.split(X):
 predictions = np.mean(predictions_array,axis=0)
 predictions[predictions<0] = 0
 predictions[predictions>9] = 9
-print("The average CV mean absolute error is %d" % np.mean(CV_score_array,axis=0))
+print(f"CV scaore {CV_score_array}")
 sample_df['Danceability'] = np.rint(predictions)
 sample_df.to_csv('submission.csv',index=False)
