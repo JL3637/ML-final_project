@@ -25,14 +25,14 @@ X_test = test_df[use_list].to_numpy()
 poly = PolynomialFeatures(3)
 poly.fit_transform(X)
 
-kf = KFold(n_splits=5, random_state=42, shuffle=True)
+kf = KFold(n_splits=10, random_state=42, shuffle=True)
 predictions_array = []
 CV_score_array    = []
 for train_index, valid_index in kf.split(X):
     X_train, X_valid = X[train_index], X[valid_index]
     y_train, y_valid = y[train_index], y[valid_index]
-    # regressor = HistGradientBoostingRegressor()
-    regressor = LinearRegression()
+    regressor = HistGradientBoostingRegressor()
+    # regressor = LinearRegression()
     # regressor = RandomForestRegressor()
     regressor.fit(X_train, y_train)
     predictions_array.append(regressor.predict(X_test))
