@@ -10,6 +10,7 @@ from sklearn.ensemble import VotingRegressor
 from sklearn.model_selection import KFold
 from sklearn.metrics import mean_absolute_error
 from sklearn.preprocessing import PolynomialFeatures
+from sklearn.preprocessing import MinMaxScaler
 
 train_df = pd.read_csv('train.csv')
 test_df = pd.read_csv('test.csv')
@@ -33,6 +34,12 @@ use_list = ['Energy', 'Key', 'Loudness', 'Speechiness', 'Acousticness', 'Instrum
 X = train_df[use_list].to_numpy()
 X_test = test_df[use_list].to_numpy()
 
+scaler = MinMaxScaler(feature_range=(0, 1)).fit(X)
+X = scaler.transform(X)
+
+scaler = MinMaxScaler(feature_range=(0, 1)).fit(X_test)
+X_test = scaler.transform(X_test)
+
 # poly = PolynomialFeatures(2)
 # X = poly.fit_transform(X)
 # X_test = poly.fit_transform(X_test)
@@ -46,7 +53,7 @@ for train_index, valid_index in kf.split(X):
     print(cnt)
     X_train, X_valid = X[train_index], X[valid_index]
     y_train, y_valid = y[train_index], y[valid_index]
-    regressor = HistGradientBoostingRegressor(loss='absolute_error', learning_rate=0.1, max_iter=400, max_leaf_nodes=200)
+    regressor = HistGradientBoostingRegressor(loss='absolute_error')
     # regressor = tree.DecisionTreeRegressor()
     # regressor = LinearRegression()
     # regressor = RandomForestRegressor()
