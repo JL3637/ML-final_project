@@ -11,38 +11,75 @@ from sklearn.model_selection import KFold
 from sklearn.metrics import mean_absolute_error
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import GridSearchCV
 
 train_df = pd.read_csv('train.csv')
 test_df = pd.read_csv('test.csv')
 sample_df = pd.read_csv('submission.csv')
 
-# train_df = train_df.fillna(0)
-# test_df = test_df.fillna(0)
+# train_df = train_df.fillna(0.0)
+# test_df = test_df.fillna(0.0)
 
-train_df['Album_type'].replace('album', 3, inplace=True)
-train_df['Album_type'].replace('single', 2, inplace=True)
-train_df['Album_type'].replace('compilation', 1, inplace=True)
-test_df['Album_type'].replace('album', 3, inplace=True)
-test_df['Album_type'].replace('single', 2, inplace=True)
-test_df['Album_type'].replace('compilation', 1, inplace=True)
+str_list = ['Album_type', 'Track', 'Album', 'Uri', 'Url_spotify', 'Url_youtube', 'Description','Title', 'Channel', 'Composer', 'Artist']
+# type_X = []
+# type_X_test = []
+# types = train_df['Key'].unique()
+# for t in types:
+#     type_X.append(np.array([1 if ty==t else 0 for ty in train_df['Key']]))
+#     type_X_test.append(np.array([1 if ty==t else 0 for ty in test_df['Key']]))
+
+for col in str_list:
+    tmp = []
+    for s in train_df[col]:
+        if type(s) == float:
+            tmp.append(s)
+        else:
+            tmp.append(len(s))
+    train_df[col] = np.array(tmp)
+    tmp = []
+    for s in test_df[col]:
+        if type(s) == float:
+            tmp.append(s)
+        else:
+            tmp.append(len(s))
+    test_df[col] = np.array(tmp)
 
 y = train_df[['Danceability']].to_numpy().squeeze()
 use_list = ['Energy', 'Key', 'Loudness', 'Speechiness', 'Acousticness', 'Instrumentalness',
             'Liveness', 'Valence', 'Tempo', 'Duration_ms', 'Views', 'Likes', 'Stream',
-            'Comments', 'Licensed', 'official_video', 'Album_type']
-# use_list.remove()
+            'Comments', 'Licensed', 'official_video', 'Album_type', 'Track',
+            'Album', 'Uri', 'Url_spotify', 'Url_youtube', 'Description',
+            'Title', 'Channel', 'Composer', 'Artist', 'id']
+
 X = train_df[use_list].to_numpy()
 X_test = test_df[use_list].to_numpy()
 
-scaler = MinMaxScaler(feature_range=(0, 1)).fit(X)
-X = scaler.transform(X)
+# X = np.concatenate((train_df[use_list].to_numpy(),np.array(type_X).T),axis=1)
+# X_test = np.concatenate((test_df[use_list].to_numpy(),np.array(type_X_test).T),axis=1)
 
-scaler = MinMaxScaler(feature_range=(0, 1)).fit(X_test)
-X_test = scaler.transform(X_test)
+# scaler = MinMaxScaler(feature_range=(0, 1)).fit(X)
+# X = scaler.transform(X)
+
+# scaler = MinMaxScaler(feature_range=(0, 1)).fit(X_test)
+# X_test = scaler.transform(X_test)
 
 # poly = PolynomialFeatures(2)
 # X = poly.fit_transform(X)
 # X_test = poly.fit_transform(X_test)
+
+# param_grid = {
+#     'loss': ('squared_error', 'absolute_error', 'poisson', 'quantile'),
+#     'learning_rate': (0.01, 0.1, 1, 10),
+#     'max_iter': (100, 200, 400),
+#     'max_leaf_nodes': (3, 10, 30, 100, 200 ,400),
+#     'min_samples_leaf': (10, 20, 30),
+#     }
+# regressor = HistGradientBoostingRegressor()
+# grid_search = GridSearchCV(regressor, param_grid = param_grid)
+# grid_search.fit(X, y)
+# print(f"The best set of parameters is: {grid_search.best_params_}")
+
+# The best set of parameters is: {'learning_rate': 0.01, 'loss': 'squared_error', 'max_iter': 400, 'max_leaf_nodes': 100, 'min_samples_leaf': 30}
 
 kf = KFold(n_splits=10, random_state=42, shuffle=True)
 predictions_array = []
@@ -53,7 +90,8 @@ for train_index, valid_index in kf.split(X):
     print(cnt)
     X_train, X_valid = X[train_index], X[valid_index]
     y_train, y_valid = y[train_index], y[valid_index]
-    regressor = HistGradientBoostingRegressor(loss='absolute_error')
+    regressor = HistGradientBoostingRegressor(loss = 'absolute_error', learning_rate = 0.03, max_iter = 400,
+                                            max_leaf_nodes = 250, min_samples_leaf = 30)
     # regressor = tree.DecisionTreeRegressor()
     # regressor = LinearRegression()
     # regressor = RandomForestRegressor()
