@@ -9,6 +9,7 @@ from sklearn.ensemble import AdaBoostRegressor
 from sklearn.ensemble import VotingRegressor
 from sklearn.model_selection import KFold
 from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import GridSearchCV
@@ -20,7 +21,27 @@ sample_df = pd.read_csv('submission.csv')
 # train_df = train_df.fillna(0.0)
 # test_df = test_df.fillna(0.0)
 
-str_list = ['Album_type', 'Track', 'Album', 'Uri', 'Url_spotify', 'Url_youtube', 'Description','Title', 'Channel', 'Composer', 'Artist']
+str_list_2 = ['Album_type', 'Channel', 'Composer', 'Artist']
+for col in str_list_2:
+    types = train_df[col].unique()
+    a = 1
+    for t in types:
+        if type(t) == float:
+            continue
+        else:
+            train_df[col].replace(t, a, inplace=True)
+            a += 1
+    types = test_df[col].unique()
+    a = 1
+    for t in types:
+        if type(t) == float:
+            continue
+        else:
+            test_df[col].replace(t, a, inplace=True)
+            a += 1
+
+    
+str_list = ['Track', 'Album', 'Uri', 'Url_spotify', 'Url_youtube', 'Description','Title']
 # type_X = []
 # type_X_test = []
 # types = train_df['Key'].unique()
@@ -90,8 +111,8 @@ for train_index, valid_index in kf.split(X):
     print(cnt)
     X_train, X_valid = X[train_index], X[valid_index]
     y_train, y_valid = y[train_index], y[valid_index]
-    regressor = HistGradientBoostingRegressor(loss = 'absolute_error', learning_rate = 0.03, max_iter = 400,
-                                            max_leaf_nodes = 250, min_samples_leaf = 30)
+    regressor = HistGradientBoostingRegressor(loss = 'absolute_error', learning_rate = 0.04, max_iter = 400,
+                                            max_leaf_nodes = 100, min_samples_leaf = 30)
     # regressor = tree.DecisionTreeRegressor()
     # regressor = LinearRegression()
     # regressor = RandomForestRegressor()
@@ -105,3 +126,4 @@ predictions[predictions>9] = 9
 print(f"CV score {np.mean(CV_score_array)}")
 sample_df['Danceability'] = np.rint(predictions)
 sample_df.to_csv('submission.csv',index=False)
+
