@@ -21,33 +21,7 @@ sample_df = pd.read_csv('submission.csv')
 # train_df = train_df.fillna(0.0)
 # test_df = test_df.fillna(0.0)
 
-str_list_2 = ['Album_type', 'Channel', 'Composer', 'Artist']
-for col in str_list_2:
-    types = train_df[col].unique()
-    a = 1
-    for t in types:
-        if type(t) == float:
-            continue
-        else:
-            train_df[col].replace(t, a, inplace=True)
-            a += 1
-    types = test_df[col].unique()
-    a = 1
-    for t in types:
-        if type(t) == float:
-            continue
-        else:
-            test_df[col].replace(t, a, inplace=True)
-            a += 1
-
-    
-str_list = ['Track', 'Album', 'Uri', 'Url_spotify', 'Url_youtube', 'Description','Title']
-# type_X = []
-# type_X_test = []
-# types = train_df['Key'].unique()
-# for t in types:
-#     type_X.append(np.array([1 if ty==t else 0 for ty in train_df['Key']]))
-#     type_X_test.append(np.array([1 if ty==t else 0 for ty in test_df['Key']]))
+str_list = ['Album_type', 'Composer', 'Channel', 'Artist', 'Track', 'Album','Title']
 
 for col in str_list:
     tmp = []
@@ -69,8 +43,8 @@ y = train_df[['Danceability']].to_numpy().squeeze()
 use_list = ['Energy', 'Key', 'Loudness', 'Speechiness', 'Acousticness', 'Instrumentalness',
             'Liveness', 'Valence', 'Tempo', 'Duration_ms', 'Views', 'Likes', 'Stream',
             'Comments', 'Licensed', 'official_video', 'Album_type', 'Track',
-            'Album', 'Uri', 'Url_spotify', 'Url_youtube', 'Description',
-            'Title', 'Channel', 'Composer', 'Artist', 'id']
+            'Album',
+            'Title', 'Channel', 'Composer', 'Artist']
 
 X = train_df[use_list].to_numpy()
 X_test = test_df[use_list].to_numpy()
@@ -102,28 +76,38 @@ X_test = test_df[use_list].to_numpy()
 
 # The best set of parameters is: {'learning_rate': 0.01, 'loss': 'squared_error', 'max_iter': 400, 'max_leaf_nodes': 100, 'min_samples_leaf': 30}
 
-kf = KFold(n_splits=10, random_state=42, shuffle=True)
+# kf = KFold(n_splits=10, random_state=42, shuffle=True)
 predictions_array = []
-CV_score_array    = []
-cnt = 0
-for train_index, valid_index in kf.split(X):
-    cnt += 1
-    print(cnt)
-    X_train, X_valid = X[train_index], X[valid_index]
-    y_train, y_valid = y[train_index], y[valid_index]
-    regressor = HistGradientBoostingRegressor(loss = 'absolute_error', learning_rate = 0.04, max_iter = 400,
+# CV_score_array    = []
+# cnt = 0
+# for train_index, valid_index in kf.split(X):
+#     cnt += 1
+#     print(cnt)
+#     X_train, X_valid = X[train_index], X[valid_index]
+#     y_train, y_valid = y[train_index], y[valid_index]
+#     regressor = HistGradientBoostingRegressor(loss = 'absolute_error', learning_rate = 0.04, max_iter = 400,
+#                                             max_leaf_nodes = 100, min_samples_leaf = 30)
+#     # regressor = tree.DecisionTreeRegressor()
+#     # regressor = LinearRegression()
+#     # regressor = RandomForestRegressor()
+#     # regressor = AdaBoostRegressor()
+#     regressor.fit(X_train, y_train)
+#     predictions_array.append(regressor.predict(X_test))
+#     CV_score_array.append(mean_absolute_error(y_valid,regressor.predict(X_valid)))
+# predictions = np.mean(predictions_array,axis=0)
+# predictions[predictions<0] = 0
+# predictions[predictions>9] = 9
+# print(f"CV score {np.mean(CV_score_array)}")
+# sample_df['Danceability'] = np.rint(predictions)
+# sample_df.to_csv('submission.csv',index=False)
+
+
+regressor = HistGradientBoostingRegressor(loss = 'absolute_error', learning_rate = 0.04, max_iter = 400,
                                             max_leaf_nodes = 100, min_samples_leaf = 30)
-    # regressor = tree.DecisionTreeRegressor()
-    # regressor = LinearRegression()
-    # regressor = RandomForestRegressor()
-    # regressor = AdaBoostRegressor()
-    regressor.fit(X_train, y_train)
-    predictions_array.append(regressor.predict(X_test))
-    CV_score_array.append(mean_absolute_error(y_valid,regressor.predict(X_valid)))
+regressor.fit(X, y)
+predictions_array.append(regressor.predict(X_test))
 predictions = np.mean(predictions_array,axis=0)
 predictions[predictions<0] = 0
 predictions[predictions>9] = 9
-print(f"CV score {np.mean(CV_score_array)}")
 sample_df['Danceability'] = np.rint(predictions)
 sample_df.to_csv('submission.csv',index=False)
-
